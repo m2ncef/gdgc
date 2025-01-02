@@ -6,7 +6,7 @@ const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate();
+    const nav = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -25,7 +25,7 @@ const Login = () => {
 
                 localStorage.setItem('user', JSON.stringify(response.data.user));
 
-                navigate('/dashboard');
+                nav('/dashboard');
             } else {
                 setError('Login failed. Please check your credentials.');
             }
@@ -58,6 +58,8 @@ const Login = () => {
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 <button type="submit">Login</button>
             </form>
+            <button type="submit" onClick={() => nav("/register")}>Register</button>
+
         </div>
     );
 };

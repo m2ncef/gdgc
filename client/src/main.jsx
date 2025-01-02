@@ -9,12 +9,16 @@ import Login from "./components/auth/login";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <App />,
+    element: <Register />,
   }, {
     path: "/register",
     element: <Register />,
   }, {
     path: "/login",
+    element: <Login />,
+  },
+  {
+    path: "/dashboard",
     element: <Login />,
   },
 ]);

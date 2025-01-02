@@ -37,5 +37,9 @@
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.17",
     "vite": "^5.4.1"
-  }
+  },
+  "description": "Welcome to the **React + Vite Template**! This template is designed to help you get started quickly with a React application using Vite, providing a minimal setup with Hot Module Replacement (HMR) and some ESLint rules to keep your code clean and consistent.",
+  "main": "eslint.config.js",
+  "author": "",
+  "license": "ISC"
 }
