@@ -11,7 +11,6 @@ const Profile = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        // Add your profile update logic here
     };
 
     return (
