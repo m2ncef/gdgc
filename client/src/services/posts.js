@@ -180,3 +180,31 @@ export const getSavedPosts = async () => {
 
   return response.json();
 };
+
+export const getOtherUsersPosts = async () => {
+  const response = await fetch(`${API_URL}/posts/others`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch other users' posts");
+  }
+
+  return response.json();
+};
+
+export const getMyPosts = async () => {
+  const response = await fetch(`${API_URL}/posts/me`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to fetch your posts");
+  }
+
+  return response.json();
+};

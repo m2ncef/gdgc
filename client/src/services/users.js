@@ -14,8 +14,8 @@ export const getUsers = async () => {
   return response.json();
 };
 
-export const getUserById = async (id) => {
-  const response = await fetch(`${API_URL}/users/${id}`, {
+export const getUser = async () => {
+  const response = await fetch(`${API_URL}/users`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
     },

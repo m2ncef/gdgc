@@ -6,7 +6,9 @@ const auth = require("../middleware/auth");
 
 router.use(auth);
 
-// Specific routes first
+// Specific routes first (no parameters)
+router.get("/others", postsController.getOtherUsersPosts);
+router.get("/me", postsController.getMyPosts);
 router.get("/saved", postsController.getSavedPosts);
 router.post("/", postsController.createPost);
 router.get("/", postsController.getPosts);

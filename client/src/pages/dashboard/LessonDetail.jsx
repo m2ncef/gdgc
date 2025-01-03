@@ -1,13 +1,38 @@
 import { useParams } from "react-router-dom";
 import DashboardLayout from "../../components/dashboard/DashboardLayout";
 import { MapPin } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { courseData } from "./course"; // Import courseData
 
 const LessonDetail = () => {
   const { courseId } = useParams();
   const [activeTab, setActiveTab] = useState("online");
   const [activeLesson, setActiveLesson] = useState(0);
+
+  // Add refs for sections
+  const onlineRef = useRef(null);
+  const inpersonRef = useRef(null);
+
+  // Update active tab based on scroll position
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 200; // Offset for better trigger point
+
+      if (onlineRef.current && inpersonRef.current) {
+        const onlinePosition = onlineRef.current.offsetTop;
+        const inpersonPosition = inpersonRef.current.offsetTop;
+
+        if (scrollPosition >= inpersonPosition) {
+          setActiveTab("inperson");
+        } else if (scrollPosition >= onlinePosition) {
+          setActiveTab("online");
+        }
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // Find the course from courseData
   const course = Object.values(courseData)
@@ -17,16 +42,20 @@ const LessonDetail = () => {
   const currentLesson = course?.lessons[activeLesson];
 
   const scrollToSection = (sectionId) => {
-    setActiveTab(sectionId);
-    const element = document.getElementById(sectionId);
-    const offset = 100;
-    const elementPosition = element.getBoundingClientRect().top;
-    const offsetPosition = elementPosition + window.pageYOffset - offset;
+    const sectionRef = sectionId === "online" ? onlineRef : inpersonRef;
 
-    window.scrollTo({
-      top: offsetPosition,
-      behavior: "smooth",
-    });
+    if (sectionRef.current) {
+      const headerOffset = 120;
+      const elementPosition = sectionRef.current.offsetTop;
+      const offsetPosition = elementPosition - headerOffset;
+
+      window.document.querySelector("main").scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+
+      setActiveTab(sectionId);
+    }
   };
 
   if (!course) {
@@ -83,14 +112,11 @@ const LessonDetail = () => {
       )}
 
       {/* Tabs */}
-      <div className="mb-8 sticky top-0 bg-[#f9f9f9] z-10">
+      <div className="mb-8 sticky top-0 bg-[#f9f9f9] z-10 py-4">
         <div className="border-b border-gray-200">
           <nav className="-mb-px flex space-x-8">
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToSection("online");
-              }}
+              onClick={() => scrollToSection("online")}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium transition-colors duration-200 ${
                 activeTab === "online"
                   ? "border-[#078BFE] text-[#078BFE]"
@@ -100,10 +126,7 @@ const LessonDetail = () => {
               Online Lesson
             </button>
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                scrollToSection("inperson");
-              }}
+              onClick={() => scrollToSection("inperson")}
               className={`whitespace-nowrap py-4 px-1 border-b-2 font-medium transition-colors duration-200 ${
                 activeTab === "inperson"
                   ? "border-[#078BFE] text-[#078BFE]"
@@ -117,7 +140,7 @@ const LessonDetail = () => {
       </div>
 
       {/* Online Lesson Section */}
-      <div id="online" className="mb-12 scroll-mt-24">
+      <section ref={onlineRef} className="mb-12 pt-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
           {currentLesson?.title}
         </h2>
@@ -154,10 +177,10 @@ const LessonDetail = () => {
             </svg>
           </button>
         </div>
-      </div>
+      </section>
 
       {/* In-Person Section */}
-      <div id="inperson" className="scroll-mt-24">
+      <section ref={inpersonRef} className="pt-4">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">
           In-Person Classes
         </h2>
@@ -188,7 +211,7 @@ const LessonDetail = () => {
             ))}
           </div>
         </div>
-      </div>
+      </section>
     </div>
   );
 };

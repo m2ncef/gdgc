@@ -9,19 +9,26 @@ const postSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  images: [
+  userId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  upvotes: [
     {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  downvotes: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   ],
   likes: {
     type: Number,
     default: 0,
-  },
-  userId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
   },
   createdAt: {
     type: Date,

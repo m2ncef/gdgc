@@ -426,6 +426,90 @@ export { courseData };
 const Course = () => {
   const [activeSkill, setActiveSkill] = useState("frontend");
 
+  const renderCourseRoadmap = (courses) => {
+    return (
+      <div className="relative">
+        {/* Connecting Line */}
+        <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-gradient-to-b from-[#078BFE] to-[#06b6d4] -translate-x-1/2 hidden lg:block" />
+
+        <div className="space-y-12">
+          {courses.map((course, index) => (
+            <div key={course.id} className="relative">
+              {/* Path Decoration */}
+              {index !== courses.length - 1 && (
+                <div className="absolute left-1/2 top-[100px] h-[100px] w-24 -translate-x-1/2 hidden lg:block">
+                  <div className="h-full w-full border-l-4 border-dashed border-[#078BFE] animate-pulse" />
+                </div>
+              )}
+
+              <div
+                className={`flex items-center gap-8 ${
+                  index % 2 === 0 ? "lg:flex-row" : "lg:flex-row-reverse"
+                }`}
+              >
+                {/* Course Card */}
+                <Link
+                  to={`/dashboard/courses/${course.id}`}
+                  className="flex-1 group"
+                >
+                  <div className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border-2 border-transparent hover:border-[#078BFE]">
+                    <div className="relative">
+                      {/* Level Badge */}
+                      <div className="absolute -top-3 -right-3">
+                        <span
+                          className={`inline-block px-3 py-1 rounded-full text-xs font-semibold
+                          ${
+                            course.level === "Beginner"
+                              ? "bg-green-100 text-green-600"
+                              : course.level === "Intermediate"
+                              ? "bg-yellow-100 text-yellow-600"
+                              : "bg-red-100 text-red-600"
+                          }`}
+                        >
+                          {course.level}
+                        </span>
+                      </div>
+
+                      <h3 className="text-xl font-bold text-gray-800 mb-2 group-hover:text-[#078BFE] transition-colors">
+                        {course.title}
+                      </h3>
+                      <p className="text-gray-600 mb-4 line-clamp-2">
+                        {course.description}
+                      </p>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-[#078BFE]">
+                            {course.duration}
+                          </span>
+                          <span className="text-gray-400">•</span>
+                          <span className="text-sm text-orange-500">
+                            {course.cost}
+                          </span>
+                          <span className="text-gray-400">•</span>
+                          <span className="text-sm text-green-500">
+                            {course.reward}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+
+                {/* Timeline Node */}
+                <div className="hidden lg:flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-br from-[#078BFE] to-[#06b6d4] shadow-lg transform hover:scale-110 transition-transform">
+                  <span className="text-white font-bold text-3xl">
+                    {index + 1}
+                  </span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="p-6">
       {/* Welcome Section */}
@@ -453,7 +537,7 @@ const Course = () => {
       </div>
 
       {/* Course Categories */}
-      <div className="flex flex-col md:flex-row gap-6 mb-8">
+      <div className="flex flex-col md:flex-row gap-6 mb-12">
         {Object.entries(courseData).map(([key, value]) => (
           <button
             key={key}
@@ -471,8 +555,8 @@ const Course = () => {
         ))}
       </div>
 
-      {/* Course Listings */}
-      <div className="space-y-8">
+      {/* Updated Course Listings */}
+      <div className="space-y-16">
         {Object.entries(courseData).map(([key, { title, icon, courses }]) => (
           <div
             key={key}
@@ -480,57 +564,12 @@ const Course = () => {
               activeSkill === key ? "block opacity-100" : "hidden opacity-0"
             }`}
           >
-            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+            <h2 className="text-2xl font-bold text-gray-800 mb-8 flex items-center gap-3">
               {icon}
               {title} Learning Path
             </h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {courses.map((course) => (
-                <Link
-                  to={`/dashboard/courses/${course.id}`}
-                  key={course.id}
-                  className="bg-white rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300"
-                >
-                  <div className="flex flex-col h-full">
-                    <div className="mb-4">
-                      <h3 className="text-lg font-bold text-gray-800 mb-2">
-                        {course.title}
-                      </h3>
-                      <p className="text-gray-600 line-clamp-2">
-                        {course.description}
-                      </p>
-                    </div>
-
-                    <div className="mt-auto space-y-4">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#078BFE]">
-                          {course.duration}
-                        </span>
-                        <span className="bg-[#078BFE]/10 text-[#078BFE] px-3 py-1 rounded-full text-sm">
-                          {course.level}
-                        </span>
-                      </div>
-
-                      <div className="flex justify-between items-center pt-4 border-t">
-                        <div className="flex flex-col">
-                          <span className="text-orange-500 font-medium">
-                            {course.cost}
-                          </span>
-                          <span className="text-xs text-gray-500">Cost</span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-green-500 font-medium">
-                            {course.reward}
-                          </span>
-                          <span className="text-xs text-gray-500">Reward</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-            </div>
+            {renderCourseRoadmap(courses)}
           </div>
         ))}
       </div>

@@ -1,4 +1,6 @@
 const User = require("../models/User");
+const Post = require("../models/Post");
+const Comment = require("../models/Comment");
 
 class UserController {
   async getUsers(req, res) {
@@ -6,10 +8,56 @@ class UserController {
     res.json(users);
   }
 
-  async getUserById(req, res) {
-    const { id } = req.params;
-    const user = await User.findById(id);
-    res.json(user);
+  async getUser(req, res) {
+    try {
+      const userId = req.user.userId;
+
+      // Get user with basic info
+      const user = await User.findById(userId).select("-password");
+
+      // Get user stats
+      const stats = {
+        postsCount: await Post.countDocuments({ userId }),
+        commentsCount: await Comment.countDocuments({ userId }),
+        savedCount: user.savedPosts.length,
+        reputation: user.reputation || 0,
+        votesReceived: await Post.aggregate([
+          { $match: { userId: userId } },
+          {
+            $project: {
+              votes: { $size: "$upvotes" },
+              downvotes: { $size: "$downvotes" },
+            },
+          },
+          {
+            $group: {
+              _id: null,
+              total: {
+                $sum: { $subtract: ["$votes", "$downvotes"] },
+              },
+            },
+          },
+        ]).then((result) => result[0]?.total || 0),
+        votesGiven: await Post.aggregate([
+          {
+            $match: {
+              $or: [{ upvotes: userId }, { downvotes: userId }],
+            },
+          },
+          { $count: "total" },
+        ]).then((result) => result[0]?.total || 0),
+      };
+
+      res.json({
+        ...user.toObject(),
+        stats,
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: "Error fetching user data",
+        error: error.message,
+      });
+    }
   }
 
   async updateUser(req, res) {

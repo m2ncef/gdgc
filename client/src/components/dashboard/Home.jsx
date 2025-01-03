@@ -18,7 +18,9 @@ import {
   upvotePost,
   downvotePost,
   savePost,
+  getOtherUsersPosts,
 } from "../../services/posts";
+import { getUser } from "@/services/users";
 
 function Home() {
   const [posts, setPosts] = useState([]);
@@ -42,26 +44,29 @@ function Home() {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
+  const [user, setUser] = useState(null);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [viewType, setViewType] = useState("grid"); // 'grid', 'list', or 'compact'
+  const [userStats, setUserStats] = useState({
+    postsCount: 0,
+    commentsCount: 0,
+    savedCount: 0,
+    reputation: 0,
+    votesReceived: 0,
+    votesGiven: 0,
+  });
 
   // Fetch posts on component mount
   useEffect(() => {
     fetchPosts();
+    fetchUser();
   }, []);
 
   const fetchPosts = async () => {
     try {
       setIsLoading(true);
-      const fetchedPosts = await getPosts();
-      setPosts(fetchedPosts);
-
-      // Initialize vote counts
-      const initialVoteCounts = {};
-      fetchedPosts.forEach((post) => {
-        initialVoteCounts[post.id] = post.votes || 0;
-      });
-      setPostVotesCounts(initialVoteCounts);
+      const data = await getOtherUsersPosts();
+      setPosts(data);
     } catch (err) {
       setError("Failed to fetch posts");
       console.error("Error fetching posts:", err);
@@ -216,10 +221,21 @@ function Home() {
         ...prev,
         [postId]: isUpvote ? "up" : "down",
       }));
+      fetchPosts();
     } catch (error) {
       console.error("Failed to vote:", error);
     } finally {
       setVoteLoading((prev) => ({ ...prev, [postId]: false }));
+    }
+  };
+
+  const fetchUser = async () => {
+    try {
+      const userData = await getUser();
+      setUser(userData);
+      setUserStats(userData.stats);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
     }
   };
 
@@ -268,43 +284,58 @@ function Home() {
         <div className="bg-white rounded-lg p-4 shadow">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold">Reputation</h3>
-            <span className="text-gray-400">↓</span>
+            <span className="text-[#078BFE]">↗</span>
           </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-bold">2</span>
-            <span className="text-sm text-gray-500">
-              Earn reputation by{" "}
-              <a href="#" className="text-[#078BFE]">
-                Helping others.
-              </a>
-            </span>
+          <div>
+            <p className="text-2xl font-bold">{userStats.reputation}</p>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span>+{userStats.votesReceived} votes received</span>
+              <span>•</span>
+              <span>{userStats.votesGiven} votes given</span>
+            </div>
           </div>
         </div>
 
-        {/* Last Course Progress Card */}
+        {/* Posts & Comments Card */}
         <div className="bg-white rounded-lg p-4 shadow">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold">Last Course Progress</h3>
-            <span className="text-gray-400">⊞</span>
+            <h3 className="font-semibold">Activity</h3>
+            <span className="text-[#078BFE]">↗</span>
+          </div>
+          <div>
+            <p className="text-2xl font-bold">
+              {userStats.postsCount + userStats.commentsCount}
+            </p>
+            <div className="flex items-center gap-2 text-sm text-gray-500">
+              <span>{userStats.postsCount} posts</span>
+              <span>•</span>
+              <span>{userStats.commentsCount} comments</span>
+              <span>•</span>
+              <span>{userStats.savedCount} saved</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Progress Card */}
+        <div className="bg-white rounded-lg p-4 shadow">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold">Progress</h3>
+            <span className="text-[#078BFE]">↗</span>
           </div>
           <div>
             <div className="flex justify-between text-sm mb-1">
-              <span>50</span>
-              <span className="text-gray-500">/100 Lessons</span>
+              <span>{userStats.postsCount}</span>
+              <span className="text-gray-500">/10 Posts</span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
-              <div className="bg-[#078BFE] h-2 rounded-full w-1/2"></div>
+              <div
+                className="bg-[#078BFE] h-2 rounded-full"
+                style={{
+                  width: `${Math.min((userStats.postsCount / 10) * 100, 100)}%`,
+                }}
+              ></div>
             </div>
           </div>
-        </div>
-
-        {/* Watched Tags Card */}
-        <div className="bg-white rounded-lg p-4 shadow">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold">Watched tags</h3>
-            <span className="text-gray-400">⊕</span>
-          </div>
-          <p className="text-gray-500">You're not watching Tags yet!</p>
         </div>
       </div>
 
@@ -404,7 +435,7 @@ function Home() {
                       <p className="text-gray-600 mb-2">{post.content}</p>
                     )}
                     <div className="flex items-center justify-between">
-                      <div className="flex gap-2">
+                      <div className="flex items-center gap-2">
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -422,14 +453,29 @@ function Home() {
                               userVotes[post._id] === "up" ? "fill-current" : ""
                             }`}
                           />
-                          <span className="ml-1">{post.likes || 0}</span>
                         </button>
-
-                        <button className="p-1 rounded-full text-gray-500 hover:bg-gray-100">
-                          <MessageSquare className="h-4 w-4" />
-                          <span className="ml-1">
-                            {post.comments?.length || 0}
-                          </span>
+                        <span className="mx-1">
+                          {post.upvotes.length - post.downvotes.length || 0}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleVote(post._id, false);
+                          }}
+                          disabled={voteLoading[post._id]}
+                          className={`ml-1 p-1 rounded-full transition-colors ${
+                            userVotes[post._id] === "down"
+                              ? "text-red-600"
+                              : "text-gray-500 hover:text-red-600 hover:bg-gray-100"
+                          }`}
+                        >
+                          <ThumbsDown
+                            className={`h-4 w-4 ${
+                              userVotes[post._id] === "down"
+                                ? "fill-current"
+                                : ""
+                            }`}
+                          />
                         </button>
                       </div>
                       <button

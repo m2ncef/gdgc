@@ -31,6 +31,32 @@ const userSchema = new mongoose.Schema({
       ref: "Post",
     },
   ],
+  reputation: {
+    type: Number,
+    default: 0,
+  },
+  stats: {
+    postsCount: {
+      type: Number,
+      default: 0,
+    },
+    commentsCount: {
+      type: Number,
+      default: 0,
+    },
+    savedCount: {
+      type: Number,
+      default: 0,
+    },
+    votesReceived: {
+      type: Number,
+      default: 0,
+    },
+    votesGiven: {
+      type: Number,
+      default: 0,
+    },
+  },
 });
 
 module.exports = mongoose.model("User", userSchema);

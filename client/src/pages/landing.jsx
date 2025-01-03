@@ -1,10 +1,45 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
+import { Link } from "react-router-dom";
 import coderealogo from "../assets/logo.png";
 import rafiki from "../assets/rafiki.png";
 import icon from "../assets/_icon.png";
 import feedback from "../assets/feedback.png";
 
 const Landing = () => {
+  useEffect(() => {
+    // Add smooth scrolling for all links with href starting with #
+    const handleSmoothScroll = (e) => {
+      const href = e.currentTarget.getAttribute("href");
+      if (href?.startsWith("#")) {
+        e.preventDefault();
+        const targetId = href.replace("#", "");
+        const element = document.getElementById(targetId);
+        if (element) {
+          const headerOffset = 80; // Adjust this value based on your header height
+          const elementPosition = element.getBoundingClientRect().top;
+          const offsetPosition =
+            elementPosition + window.pageYOffset - headerOffset;
+
+          window.scrollTo({
+            top: offsetPosition,
+            behavior: "smooth",
+          });
+        }
+      }
+    };
+
+    const links = document.querySelectorAll('a[href^="#"]');
+    links.forEach((link) => {
+      link.addEventListener("click", handleSmoothScroll);
+    });
+
+    return () => {
+      links.forEach((link) => {
+        link.removeEventListener("click", handleSmoothScroll);
+      });
+    };
+  }, []);
+
   return (
     <div className="min-h-screen  bg-gradient-to-b from-gray-50 to-white">
       {/* Navigation */}

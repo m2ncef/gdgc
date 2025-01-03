@@ -20,6 +20,7 @@ import {
   upvotePost,
   downvotePost,
   savePost,
+  getMyPosts,
 } from "../../services/posts";
 
 const Posts = () => {
@@ -45,7 +46,7 @@ const Posts = () => {
   const fetchPosts = async () => {
     try {
       setLoading(true);
-      const data = await getPosts();
+      const data = await getMyPosts();
       setPosts(data);
     } catch (error) {
       console.error("Error fetching posts:", error);
@@ -120,20 +121,21 @@ const Posts = () => {
       setVoteLoading((prev) => ({ ...prev, [postId]: true }));
 
       const voteFunction = isUpvote ? upvotePost : downvotePost;
-      const updatedPost = await voteFunction(postId);
+      const response = await voteFunction(postId);
 
       // Update posts with new vote count
       setPosts(
         posts.map((post) =>
-          post._id === postId ? { ...post, votes: updatedPost.votes } : post
+          post._id === postId ? { ...post, likes: response.likes } : post
         )
       );
 
       // Update user's vote state
       setUserVotes((prev) => ({
         ...prev,
-        [postId]: isUpvote ? "up" : "down",
+        [postId]: response.userVote,
       }));
+      fetchPosts();
     } catch (error) {
       console.error("Failed to vote:", error);
     } finally {
@@ -200,14 +202,29 @@ const Posts = () => {
               <h3 className="font-semibold mb-2">{post.title}</h3>
               <p className="text-lg mb-4">{post.content}</p>
               <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="sm">
-                    <ThumbsUpIcon className="h-4 w-4 mr-2" />
-                    {post.likes || 0}
+                <div className="flex gap-2 items-center">
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVote(post._id, true);
+                    }}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <ThumbsUpIcon className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="sm">
-                    <MessageSquare className="h-4 w-4 mr-2" />
-                    {post.comments?.length || 0}
+                  <span className="mx-1">
+                    {post.upvotes.length - post.downvotes.length || 0}
+                  </span>
+                  <Button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleVote(post._id, false);
+                    }}
+                    variant="ghost"
+                    size="sm"
+                  >
+                    <ThumbsDownIcon className="h-4 w-4" />
                   </Button>
                 </div>
                 <Button

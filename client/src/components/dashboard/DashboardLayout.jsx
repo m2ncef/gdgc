@@ -191,7 +191,7 @@ const DashboardLayout = ({ children }) => {
         <SidebarContent />
       </aside>
 
-      <main className="flex-1 py-8 px-8 h-[100vh] overflow-y-auto">
+      <main className="flex-1 my-8 px-8 h-[100vh] overflow-y-auto">
         {children}
       </main>
     </div>
