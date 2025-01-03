@@ -102,6 +102,30 @@ class AuthController {
       res.status(401).json({ message: "Invalid token" });
     }
   }
+
+  async forgotPassword(req, res) {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const resetToken = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    res.json({ resetToken });
+  }
+
+  async resetPassword(req, res) {
+    const { resetToken, newPassword } = req.body;
+    const user = await User.findOne({ resetToken });
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+    user.password = hashedPassword;
+    await user.save();
+    res.json({ message: "Password reset successful" });
+  }
 }
 
 module.exports = new AuthController();
