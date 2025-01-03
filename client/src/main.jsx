@@ -7,6 +7,8 @@ import Login from "./components/auth/Login";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 import Overview from "./pages/dashboard/Overview";
 import Profile from "./pages/dashboard/Profile";
+import ForgotPassword from "./components/auth/forgotpsw";
+import ResetPassword from "./components/auth/resetPass";
 
 const router = createBrowserRouter([
   {
@@ -20,6 +22,14 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <Login />,
+  },
+  {
+    path: "/forgot-password",
+    element: <ForgotPassword />,
+  },
+  {
+    path: "/reset-password",
+    element: <ResetPassword />,
   },
   {
     path: "/dashboard",
