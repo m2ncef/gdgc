@@ -1,98 +1,132 @@
 import axios from 'axios';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardHeader, CardContent, CardFooter } from "@/components/ui/card";
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
+import Google from './google.png'
 
 const Register = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [name, setName] = useState("");
-    const [error, setError] = useState("");
-
+    const [fullName, setFullName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [error, setError] = useState('');
     const nav = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!email || !password || !name) {
-            setError('All fields are required!');
+        if (!fullName || !email || !password || !confirmPassword) {
+            setError('All fields are required.');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            setError('Passwords do not match.');
             return;
         }
 
         try {
-            const response = await axios.post("your-api-endpoint/register", { name, email, password });
+            const response = await axios.post('/api/auth/register', {
+                fullName,
+                email,
+                password
+            });
 
             if (response.data.success) {
                 const token = response.data.token;
-                localStorage.setItem('token', token);
-                nav("/login");
+                localStorage.setItem('authToken', token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
+                nav('/dashboard');
             } else {
-                setError(response.data.message || 'Registration failed!');
+                setError('Registration failed. Please try again.');
             }
         } catch (err) {
             console.error('Error during registration:', err);
-            setError('An error occurred during registration. Please try again.');
+            setError(err.response?.data?.message || 'An error occurred. Please try again later.');
         }
     };
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-gray-100">
-            <Card className="w-[350px]">
-                <CardHeader>
-                    <h2 className="text-2xl font-bold text-center">Register</h2>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="name">Name</Label>
-                            <Input
-                                id="name"
-                                type="text"
-                                placeholder="Enter your name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                            />
+            <div className="w-[400px] bg-white rounded-md shadow-md p-8">
+                <div className="text-right text-sm text-gray-500">English(UK)</div>
+                <h2 className="text-2xl font-bold text-center mb-4">Create Account</h2>
+                
+                <button
+                    className="flex items-center justify-center w-full py-2 border border-gray-300 rounded-md mb-4"
+                    onClick={() => console.log("Sign up with Google")}
+                >
+                    <img
+                        src={Google}
+                        alt="Google logo"
+                        className="w-5 h-5 mr-2"
+                    />
+                    Sign up with Google
+                </button>
+
+                <div className="text-center text-gray-500 mb-4">-OR-</div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <input
+                            type="text"
+                            value={fullName}
+                            onChange={(e) => setFullName(e.target.value)}
+                            placeholder="Full name"
+                            className="w-full p-3 border border-gray-300 rounded-lg"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Email address"
+                            className="w-full p-3 border border-gray-300 rounded-lg"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Password"
+                            className="w-full p-3 border border-gray-300 rounded-lg"
+                        />
+                    </div>
+                    <div>
+                        <input
+                            type="password"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            placeholder="Confirm Password"
+                            className="w-full p-3 border border-gray-300 rounded-lg"
+                        />
+                    </div>
+                    
+                    {error && (
+                        <div className="text-red-500 text-sm text-center">
+                            {error}
                         </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="email">Email</Label>
-                            <Input
-                                id="email"
-                                type="email"
-                                placeholder="Enter your email"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <Label htmlFor="password">Password</Label>
-                            <Input
-                                id="password"
-                                type="password"
-                                placeholder="Enter your password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                            />
-                        </div>
-                        {error && (
-                            <p className="text-sm text-red-500 text-center">{error}</p>
-                        )}
-                        <Button type="submit" className="w-full">
-                            Register
-                        </Button>
-                    </form>
-                </CardContent>
-                <CardFooter className="flex justify-center">
-                    <Button
-                        variant="outline"
-                        onClick={() => nav("/login")}
+                    )}
+
+                    <button
+                        type="submit"
+                        className="w-full bg-black text-white py-2 rounded-md hover:bg-gray-800"
                     >
-                        Already have an account?
-                    </Button>
-                </CardFooter>
-            </Card>
+                        Create Account
+                    </button>
+                </form>
+
+                <div className="text-center text-sm text-gray-500 mt-4">
+                    Already have an account?{" "}
+                    <button
+                        className="text-blue-500 hover:underline"
+                        onClick={() => nav('/login')}
+                    >
+                        Login
+                    </button>
+                </div>
+            </div>
         </div>
     );
 };
