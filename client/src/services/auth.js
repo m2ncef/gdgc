@@ -1,8 +1,11 @@
-const { API_URL } = require("@/utils/config");
+import { API_URL } from "../utils/config";
 
-const login = async (email, password) => {
+export const login = async (email, password) => {
   const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ email, password }),
   });
 
@@ -10,31 +13,35 @@ const login = async (email, password) => {
     throw new Error("Login failed");
   }
 
-  localStorage.setItem("token", response.token);
-
   const data = await response.json();
+
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("user", JSON.stringify(data.user));
+
   return { user: data.user, token: data.token };
 };
 
-const logout = () => {
+export const logout = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("user");
 };
 
-const register = async (email, password, name) => {
+export const register = async (email, password, name) => {
   const response = await fetch(`${API_URL}/auth/register`, {
     method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
     body: JSON.stringify({ email, password, name }),
   });
 
-  if (response.status !== 200) {
+  if (response.status !== 201) {
     throw new Error("Registration failed");
   }
 
   const data = await response.json();
 
   localStorage.setItem("token", data.token);
-
+  localStorage.setItem("user", JSON.stringify(data.user));
   return { user: data.user, token: data.token };
 };
-
-module.exports = { login, logout, register };

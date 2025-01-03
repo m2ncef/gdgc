@@ -47,12 +47,13 @@ class AuthController {
         return res.status(400).json({ message: "User already exists" });
       }
 
-      const hashedPassword = await bcrypt.hash(password, 12);
+      const hashedPassword = await bcrypt.hash(String(password), 10);
 
       const user = new User({
         email,
         password: hashedPassword,
         name,
+        role: "user",
       });
 
       await user.save();
@@ -72,6 +73,7 @@ class AuthController {
         },
       });
     } catch (error) {
+      console.log(error);
       res.status(500).json({ message: "Server error" });
     }
   }

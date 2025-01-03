@@ -1,6 +1,6 @@
-const { API_URL } = require("@/utils/config");
+import { API_URL } from "@/utils/config";
 
-const getUsers = async () => {
+export const getUsers = async () => {
   const response = await fetch(`${API_URL}/users`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -14,7 +14,7 @@ const getUsers = async () => {
   return response.json();
 };
 
-const getUserById = async (id) => {
+export const getUserById = async (id) => {
   const response = await fetch(`${API_URL}/users/${id}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`,
@@ -28,7 +28,7 @@ const getUserById = async (id) => {
   return response.json();
 };
 
-const updateUser = async (id, user) => {
+export const updateUser = async (id, user) => {
   const response = await fetch(`${API_URL}/users/${id}`, {
     method: "PUT",
     body: JSON.stringify(user),
@@ -44,7 +44,34 @@ const updateUser = async (id, user) => {
   return response.json();
 };
 
-const deleteUser = async (id) => {
+export const updateProfile = async (user) => {
+  const response = await fetch(`${API_URL}/users/profile`, {
+    method: "PUT",
+    body: JSON.stringify(user),
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  if (response.status !== 200) {
+    throw new Error("Failed to update profile");
+  }
+
+  const data = await response.json();
+  localStorage.setItem(
+    "user",
+    JSON.stringify({
+      id: data._id,
+      name: data.name,
+      email: data.email,
+    })
+  );
+
+  return data;
+};
+
+export const deleteUser = async (id) => {
   const response = await fetch(`${API_URL}/users/${id}`, {
     method: "DELETE",
     headers: {
@@ -58,5 +85,3 @@ const deleteUser = async (id) => {
 
   return response.json();
 };
-
-module.exports = { getUsers, getUserById, updateUser, deleteUser };
